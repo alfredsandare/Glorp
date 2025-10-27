@@ -1,0 +1,10 @@
+[
+    {
+        "x_pos": 0,
+        "y_pos": 0,
+        "tiles": [
+            "tiles/path_0.png",
+            "tiles/path_1.png"
+        ]
+    }
+]

@@ -1,7 +1,9 @@
+import json
 import os
 import platform
 import pygame
 
+from chunk import Chunk
 from util import is_valid_image
 
 
@@ -10,13 +12,12 @@ DIR_SEPARATOR = "/"
 if platform.system == "Windows":
     DIR_SEPARATOR = "\\"
 PATH = DIR_SEPARATOR.join(__file__.split(DIR_SEPARATOR)[:-1]) + DIR_SEPARATOR
-print(PATH)
 
 
 class Game:
     def __init__(self):
         # self.player = Player()
-        # self.chunks = 
+        self.chunks = self._load_world_data()
         self.running = True
         self.resolution = (1280, 720)
         self.screen = pygame.display.set_mode(self.resolution)
@@ -34,10 +35,14 @@ class Game:
             for event in pygame.event.get():
                 self.handle_event(event)
 
+            for chunk in self.chunks:
+                chunk.render(self.screen, self.images)
+
             pygame.display.flip()
             clock.tick(60)
 
-    def _get_images_in_directory(self, path, original_path):
+    def _get_images_in_directory(self, path: str, 
+                                 original_path: str) -> list[pygame.Surface]:
         os.chdir(path)
         files = os.listdir(os.getcwd())
 
@@ -56,6 +61,16 @@ class Game:
                 images[id_] = pygame.image.load(path_here).convert_alpha()
 
         return images
+    
+    def _load_world_data(self) -> list[Chunk]:
+        chunks = []
+        with open(f"data{DIR_SEPARATOR}world.json", "r") as file:
+            data = json.load(file)
+            for chunk_data in data:
+                chunks.append(Chunk(**chunk_data))
+                print(chunks[-1].x_pos, chunks[-1].y_pos, chunks[-1].tiles)
+
+        return chunks
 
 
 game = Game()
