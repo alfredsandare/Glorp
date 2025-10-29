@@ -21,6 +21,9 @@ class Game:
         self.running = True
         self.resolution = (1280, 720)
         self.screen = pygame.display.set_mode(self.resolution)
+        self.camera_x = 0  # unit: tiles
+        self.camera_y = 0
+        self.camera_zoom = 2
         self.images = self._get_images_in_directory(
             f"{PATH}graphics{DIR_SEPARATOR}", f"{PATH}graphics{DIR_SEPARATOR}")
 
@@ -36,7 +39,8 @@ class Game:
                 self.handle_event(event)
 
             for chunk in self.chunks:
-                chunk.render(self.screen, self.images)
+                chunk.render(self.screen, self.images, self.camera_x, 
+                             self.camera_y, self.camera_zoom)
 
             pygame.display.flip()
             clock.tick(60)
