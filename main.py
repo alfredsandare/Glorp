@@ -4,6 +4,7 @@ import platform
 import pygame
 
 from chunk import Chunk
+from player import Player
 from util import is_valid_image
 
 
@@ -16,16 +17,17 @@ PATH = DIR_SEPARATOR.join(__file__.split(DIR_SEPARATOR)[:-1]) + DIR_SEPARATOR
 
 class Game:
     def __init__(self):
-        # self.player = Player()
+        self.player = Player()
         self.chunks = self._load_world_data()
         self.running = True
         self.resolution = (1280, 720)
         self.screen = pygame.display.set_mode(self.resolution)
         self.camera_x = 0  # unit: tiles
         self.camera_y = 0
-        self.camera_zoom = 2
+        self.camera_zoom = 4
         self.images = self._get_images_in_directory(
             f"{PATH}graphics{DIR_SEPARATOR}", f"{PATH}graphics{DIR_SEPARATOR}")
+        self.mirror_player_animations()
 
     def handle_event(self, event):
         if event.type == pygame.QUIT:
@@ -38,9 +40,14 @@ class Game:
             for event in pygame.event.get():
                 self.handle_event(event)
 
+            self.player.tick()
+
             for chunk in self.chunks:
                 chunk.render(self.screen, self.images, self.camera_x, 
                              self.camera_y, self.camera_zoom)
+                
+            self.player.render(self.screen, self.images, self.camera_x,
+                               self.camera_y, self.camera_zoom)
 
             pygame.display.flip()
             clock.tick(60)
@@ -66,6 +73,13 @@ class Game:
 
         return images
     
+    def mirror_player_animations(self):
+        # Stand left
+        for i in range(6):
+            self.images[f"player/player_{i+60}.png"] = \
+                pygame.transform.flip(self.images[f"player/player_{i+6}.png"],
+                                      True, False)
+
     def _load_world_data(self) -> list[Chunk]:
         chunks = []
         with open(f"data{DIR_SEPARATOR}world.json", "r") as file:
